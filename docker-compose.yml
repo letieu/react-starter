@@ -1,0 +1,13 @@
+version: '3'
+services:
+  node:
+    container_name: react
+    restart: always
+    build:
+      context: .
+      dockerfile: ./Dockerfile.local
+    ports:
+      - 9002:3000
+    volumes:
+      - ./:/app
+      - /app/node_modules
