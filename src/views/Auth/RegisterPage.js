@@ -26,7 +26,7 @@ import Danger from "components/Typography/Danger";
 import CardFooter from "components/Card/CardFooter";
 import CardHeader from "components/Card/CardHeader.js";
 import SweetAlert from "react-bootstrap-sweetalert";
-import { useHistory } from "react-router";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles(styles);
 const useAlertStyles = makeStyles(alertStyles);

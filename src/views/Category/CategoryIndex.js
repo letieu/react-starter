@@ -9,9 +9,10 @@ import { makeStyles, Switch } from "@material-ui/core";
 import CustomInput from "components/CustomInput/CustomInput";
 import Button from "components/CustomButtons/Button.js";
 import { Link } from "react-router-dom";
-import ReactQuill from "react-quill";
-import { DeleteForever, Visibility } from "@material-ui/icons";
+import { DeleteForever, Edit, Visibility } from "@material-ui/icons";
 import useConfirm from "hooks/useConfirm";
+import { toast } from "react-toastify";
+import CategoryView from "./CategoryView";
 
 const useStyles = makeStyles({
   filter: {
@@ -26,6 +27,7 @@ export default function CategoryIndex() {
   const [items, setItems] = React.useState([]);
   const [search, setSearch] = React.useState("");
   const [activated, setActivated] = React.useState("");
+  const [viewId, setViewId] = React.useState("");
   const [page, setPage] = React.useState(0);
   const [size] = React.useState(10);
   const [count, setCount] = React.useState(0);
@@ -39,7 +41,6 @@ export default function CategoryIndex() {
       {
         Header: "Description",
         accessor: "description",
-        Cell: Description,
       },
       {
         Header: "Active",
@@ -54,9 +55,10 @@ export default function CategoryIndex() {
               cell={cell}
               handleDelete={(row) =>
                 showConfirm("Are you sure remove ?", () =>
-                  handleDelete(row._id)
+                  handleDelete(row.id)
                 )
               }
+              handleView={(row) => setViewId(row.id)}
             />
           );
         },
@@ -67,164 +69,12 @@ export default function CategoryIndex() {
 
   async function fetchCategories() {
     try {
-      // const { data } = await companyService.list({
-      //   search,
-      //   page,
-      //   size,
-      //   activated,
-      // });
-      const data = {
-        items: [
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Ct4",
-            description: "ahsdfljasldfk",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-        ],
-        paginate: {
-          count: 1,
-          size: 20,
-          page: 0,
-        },
-      };
+      const { data } = await categoryService.list({
+        search,
+        page,
+        size,
+        activated,
+      });
       setItems(data.items);
       setCount(data.paginate.count);
       setPage(data.paginate.page);
@@ -237,9 +87,10 @@ export default function CategoryIndex() {
     try {
       await categoryService.remove(id);
       await fetchCategories();
-      alert("done");
+      toast.success("Deleted category");
     } catch (e) {
       console.log(e);
+      toast.success("Cannot Delete category");
     }
   }
 
@@ -249,6 +100,8 @@ export default function CategoryIndex() {
 
   return (
     <div>
+      <CategoryView id={viewId} />
+
       {confirm}
       <Link to="/admin/category/create">
         <Button color="info">Create new category</Button>
@@ -310,42 +163,23 @@ Active.propTypes = {
   cell: PropTypes.any,
 };
 
-function Description({ cell }) {
-  return (
-    <div style={{ height: "30px", overflow: "hidden" }}>
-      <ReactQuill value={cell.value} readOnly={true} theme={"bubble"} />{" "}
-    </div>
-  );
-}
-
-Description.propTypes = {
-  cell: PropTypes.any,
-};
-
-function Action({ cell, handleDelete }) {
+function Action({ cell, handleDelete, handleView }) {
   return (
     <div className="actions-right">
-      <Link to={"/admin/category/" + cell.row.original._id}>
-        <Button
-          justIcon
-          round
-          simple
-          //onClick={() => {
-          //let obj = data.find((o) => o.id === key);
-          //}}
-          color="success"
-          className="edit"
-        >
-          <Visibility />
+      <Link to={"/admin/category/edit/" + cell.row.original._id}>
+        <Button justIcon simple round color="warning">
+          <Edit />
         </Button>
       </Link>
+      <Button justIcon round simple color="success" onClick={() => handleView(cell.row.original)}>
+        <Visibility />
+      </Button>
       <Button
         justIcon
         round
         simple
         onClick={() => handleDelete(cell.row.original)}
         color="danger"
-        className="remove"
       >
         <DeleteForever />
       </Button>{" "}
@@ -356,4 +190,5 @@ function Action({ cell, handleDelete }) {
 Action.propTypes = {
   cell: PropTypes.any,
   handleDelete: PropTypes.func,
+  handleView: PropTypes.func,
 };

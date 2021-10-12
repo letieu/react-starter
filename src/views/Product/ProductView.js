@@ -25,8 +25,7 @@ import styles from "assets/jss/material-dashboard-pro-react/views/regularFormsSt
 
 import { productService } from "services/productService";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router";
-import { useHistory } from "react-router";
+import {useHistory, useParams} from "react-router-dom";
 
 const useStyles = makeStyles(styles);
 

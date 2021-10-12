@@ -1,4 +1,5 @@
 export function cleanObject(obj) {
+  if (Object.keys(obj).length === 0) return obj;
   let stringfiedObj = JSON.stringify(obj, (_, value) => {
     return ["", null].includes(value) ||
       (typeof value === "object" &&

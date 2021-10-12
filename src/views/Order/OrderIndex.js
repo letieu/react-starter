@@ -4,14 +4,16 @@ import TablePaginate from "components/TablePaginate/TablePaginate";
 import Select from "components/Select/Select";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Search from "@material-ui/icons/Search";
-import { companyService } from "services/companyService";
-import { makeStyles, Switch } from "@material-ui/core";
+import { categoryService } from "services/categoryService";
+import { makeStyles } from "@material-ui/core";
 import CustomInput from "components/CustomInput/CustomInput";
 import Button from "components/CustomButtons/Button.js";
 import { Link } from "react-router-dom";
-import ReactQuill from "react-quill";
-import { DeleteForever, Visibility } from "@material-ui/icons";
+import { DeleteForever, Edit, Visibility } from "@material-ui/icons";
 import useConfirm from "hooks/useConfirm";
+import { toast } from "react-toastify";
+import CategoryView from "./CategoryView";
+import { orderService } from "../../services/orderService";
 
 const useStyles = makeStyles({
   filter: {
@@ -20,12 +22,13 @@ const useStyles = makeStyles({
   },
 });
 
-export default function CompanyIndex() {
+export default function OrderIndex() {
   const classes = useStyles();
   const [confirm, showConfirm] = useConfirm();
+  const [status, setStatus] = React.useState("");
   const [items, setItems] = React.useState([]);
   const [search, setSearch] = React.useState("");
-  const [activated, setActivated] = React.useState("");
+  const [viewId, setViewId] = React.useState("");
   const [page, setPage] = React.useState(0);
   const [size] = React.useState(10);
   const [count, setCount] = React.useState(0);
@@ -33,18 +36,38 @@ export default function CompanyIndex() {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Title",
-        accessor: "title",
+        Header: "Customer",
+        accessor: "customerName",
       },
       {
-        Header: "Description",
-        accessor: "description",
-        Cell: Description,
+        Header: "Phone",
+        accessor: "customerPhone",
       },
       {
-        Header: "Active",
-        accessor: "activated",
-        Cell: Active,
+        Header: "Address",
+        accessor: "customerAddress",
+      },
+      {
+        Header: "Author",
+        accessor: "createdBy.username",
+      },
+      {
+        Header: "Total",
+        accessor: "total",
+      },
+      {
+        Header: "Items",
+        accessor: "items",
+        // eslint-disable-next-line no-unused-vars,react/prop-types
+        Cell: function ({ cell }) {
+          // eslint-disable-next-line react/prop-types
+          return <span>{cell?.value?.length}</span>;
+        },
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+        Cell: Status,
       },
       {
         Header: "Action",
@@ -53,10 +76,9 @@ export default function CompanyIndex() {
             <Action
               cell={cell}
               handleDelete={(row) =>
-                showConfirm("Are you sure remove ?", () =>
-                  handleDelete(row._id)
-                )
+                showConfirm("Are you sure remove ?", () => handleDelete(row.id))
               }
+              handleView={(row) => setViewId(row.id)}
             />
           );
         },
@@ -65,13 +87,13 @@ export default function CompanyIndex() {
     []
   );
 
-  async function fetchCompanies() {
+  async function fetchOrders() {
     try {
-      const { data } = await companyService.list({
+      const { data } = await orderService.list({
+        status,
         search,
         page,
         size,
-        activated,
       });
       setItems(data.items);
       setCount(data.paginate.count);
@@ -83,23 +105,26 @@ export default function CompanyIndex() {
 
   async function handleDelete(id) {
     try {
-      await companyService.remove(id);
-      await fetchCompanies();
-      alert("done");
+      await categoryService.remove(id);
+      await fetchOrders();
+      toast.success("Deleted category");
     } catch (e) {
       console.log(e);
+      toast.success("Cannot Delete category");
     }
   }
 
   React.useEffect(() => {
-    fetchCompanies();
-  }, [page, search, activated]);
+    fetchOrders();
+  }, [page, search, status]);
 
   return (
     <div>
+      <CategoryView id={viewId} />
+
       {confirm}
-      <Link to="/admin/company/create">
-        <Button color="info">Create new company</Button>
+      <Link to="/admin/order/create">
+        <Button color="info">Create new order</Button>
       </Link>
 
       <div className={classes.filter}>
@@ -122,12 +147,14 @@ export default function CompanyIndex() {
 
         <Select
           label={"Status"}
-          value={activated}
-          onChange={setActivated}
+          value={status}
+          onChange={setStatus}
           options={[
             { value: "", label: "ALL" },
-            { value: "true", label: "ACTIVATED" },
-            { value: "false", label: "UN ACTIVE" },
+            { value: "pending", label: "PENDING" },
+            { value: "shipping", label: "SHIPPING" },
+            { value: "success", label: "SUCCESS" },
+            { value: "return", label: "RETURN" },
           ]}
         />
       </div>
@@ -144,56 +171,48 @@ export default function CompanyIndex() {
   );
 }
 
-function Active({ cell }) {
-  return (
-    <Switch
-      checked={cell.value}
-      inputProps={{ "aria-label": "controlled" }}
-      color="primary"
-    />
-  );
+function Status({ cell }) {
+  function getColor() {
+    switch (cell.row.original.status) {
+      case "pending":
+        return "danger";
+      case "shipping":
+        return "warning";
+      case "success":
+        return "success";
+      default:
+        return "default";
+    }
+  }
+  return <Button color={getColor()} size="sm">{cell.row.original.status}</Button>;
 }
-
-Active.propTypes = {
+Status.propTypes = {
   cell: PropTypes.any,
 };
 
-function Description({ cell }) {
-  return (
-    <div style={{ height: "30px", overflow: "hidden" }}>
-      <ReactQuill value={cell.value} readOnly={true} theme={"bubble"} />{" "}
-    </div>
-  );
-}
-
-Description.propTypes = {
-  cell: PropTypes.any,
-};
-
-function Action({ cell, handleDelete }) {
+function Action({ cell, handleDelete, handleView }) {
   return (
     <div className="actions-right">
-      <Link to={"/admin/company/" + cell.row.original._id}>
-        <Button
-          justIcon
-          round
-          simple
-          //onClick={() => {
-          //let obj = data.find((o) => o.id === key);
-          //}}
-          color="success"
-          className="edit"
-        >
-          <Visibility />
+      <Link to={"/admin/category/edit/" + cell.row.original._id}>
+        <Button justIcon simple round color="warning">
+          <Edit />
         </Button>
       </Link>
       <Button
         justIcon
         round
         simple
+        color="success"
+        onClick={() => handleView(cell.row.original)}
+      >
+        <Visibility />
+      </Button>
+      <Button
+        justIcon
+        round
+        simple
         onClick={() => handleDelete(cell.row.original)}
         color="danger"
-        className="remove"
       >
         <DeleteForever />
       </Button>{" "}
@@ -204,4 +223,5 @@ function Action({ cell, handleDelete }) {
 Action.propTypes = {
   cell: PropTypes.any,
   handleDelete: PropTypes.func,
+  handleView: PropTypes.func,
 };

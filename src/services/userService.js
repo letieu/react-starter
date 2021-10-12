@@ -7,7 +7,7 @@ export const userService = {
     return await axios.get("/users?" + searchParams.toString());
   },
   async create(payload) {
-    return await axios.post("/users", payload);
+    return await axios.post("/auth/register", payload);
   },
   async remove(id) {
     return await axios.delete("/users/" + id);

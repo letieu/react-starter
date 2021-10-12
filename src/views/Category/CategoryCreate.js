@@ -2,13 +2,9 @@ import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import FormLabel from "@material-ui/core/FormLabel";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 
 // @material-ui/icons
-import Check from "@material-ui/icons/Check";
 import Contacts from "@material-ui/icons/Contacts";
-import useNotify from "hooks/useNotify.js";
 
 // core components
 import GridContainer from "components/Grid/GridContainer.js";
@@ -19,58 +15,88 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/regularFormsStyle";
 
 import { categoryService } from "services/categoryService";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router";
+import {Box, TextField} from "@material-ui/core";
+import {useHistory, useParams} from "react-router-dom";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles(styles);
 
 export default function CategoryCreate() {
-  const [notify, showSuccess, showError] = useNotify();
-  const { register: category, handleSubmit } = useForm();
-  const [description, setDescription] = React.useState();
+  const { register: category, handleSubmit, setValue } = useForm();
+  const { id } = useParams();
   const history = useHistory();
 
-  function changeDescription(html) {
-    setDescription(html);
-  }
-
-  async function createCategory(form) {
+  async function create(payload) {
     try {
-      const { data } = await categoryService.create({ description, ...form });
-      showSuccess();
-      window.setTimeout(() => history.push("/admin/catetories/" + data._id), 2000);
+      const { data } = await categoryService.create(payload);
+      toast.success("Created");
+      window.setTimeout(
+        () => history.push("/admin/categories/" + data._id),
+        500
+      );
     } catch (e) {
-      showError();
+      toast.error(e?.response?.data?.message[0]);
+      console.log(e);
     }
   }
+
+  async function update(payload) {
+    try {
+      await categoryService.update(id, payload);
+      toast.success("Updated");
+    } catch (e) {
+      toast.error(e?.response?.data?.message[0]);
+      console.log(e);
+    }
+  }
+
+  async function onSubmit(form) {
+    if (id) {
+      update(form);
+    } else {
+      create(form);
+    }
+  }
+
+  async function fetchCategory() {
+    try {
+      const { data } = await categoryService.view(id);
+      const fields = ['title', 'description', 'activated'];
+      fields.forEach(field => setValue(field, data[field]));
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  React.useEffect(() => {
+    fetchCategory()
+  }, [id]);
 
   const classes = useStyles();
   return (
     <GridContainer>
-      {notify}
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="rose" icon>
             <CardIcon color="rose">
               <Contacts />
             </CardIcon>
-            <h4 className={classes.cardIconTitle}>Create Category</h4>
+            <h4 className={classes.cardIconTitle}>{ !id ? 'Create Category' : 'Edit category' }</h4>
           </CardHeader>
           <CardBody>
-            <form onSubmit={handleSubmit(createCategory)}>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={3}>
                   <FormLabel className={classes.labelHorizontal}>
                     Title
                   </FormLabel>
                 </GridItem>
-                <GridItem xs={12} sm={12} md={9}>
+                <GridItem xs={12} sm={12} md={7}>
                   <CustomInput
                     formControlProps={{
                       fullWidth: true,
@@ -88,37 +114,32 @@ export default function CategoryCreate() {
                     Description
                   </FormLabel>
                 </GridItem>
-                <GridItem xs={12} sm={12} md={9}>
-                  <ReactQuill
-                    onChange={changeDescription}
-                    value={description}
+                <GridItem xs={12} sm={12} md={7}>
+                  <TextField
+                    placeholder="Description"
+                    multiline
+                    fullWidth={true}
+                    rows={4}
+                    {...category("description")}
                   />
                 </GridItem>
               </GridContainer>
               <GridContainer justify="flex-end">
+                <GridItem xs={12} sm={12} md={3}>
+                  <FormLabel className={classes.labelHorizontal}>
+                    Active
+                  </FormLabel>
+                </GridItem>
                 <GridItem xs={12} sm={12} md={9}>
-                  <div className={classes.checkboxAndRadio}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...category("activated")}
-                          checkedIcon={
-                            <Check className={classes.checkedIcon} />
-                          }
-                          icon={<Check className={classes.uncheckedIcon} />}
-                          classes={{
-                            checked: classes.checked,
-                            root: classes.checkRoot,
-                          }}
-                        />
-                      }
-                      classes={{
-                        label: classes.label,
-                        root: classes.labelRoot,
-                      }}
-                      label="Active"
+                  <Box pt={5}>
+                    <input
+                      name="acceptTerms"
+                      type="checkbox"
+                      {...category('activated')}
+                      id="acceptTerms"
                     />
-                  </div>
+                  </Box>
+
                 </GridItem>
               </GridContainer>
               <GridContainer justify="flex-end">

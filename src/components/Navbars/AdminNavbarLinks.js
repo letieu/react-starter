@@ -26,7 +26,7 @@ import Button from "components/CustomButtons/Button.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/components/adminNavbarLinksStyle.js";
 import { jwtManager } from "helper/jwtManager";
-import { useHistory } from "react-router";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles(styles);
 

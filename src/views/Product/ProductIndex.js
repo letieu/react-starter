@@ -5,13 +5,13 @@ import Select from "components/Select/Select";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Search from "@material-ui/icons/Search";
 import { productService } from "services/productService";
-import { makeStyles, Switch } from "@material-ui/core";
+import { Chip, Fade, makeStyles, Switch, Tooltip } from "@material-ui/core";
 import CustomInput from "components/CustomInput/CustomInput";
 import Button from "components/CustomButtons/Button.js";
 import { Link } from "react-router-dom";
-import ReactQuill from "react-quill";
-import { DeleteForever, Visibility } from "@material-ui/icons";
+import {DeleteForever, Edit, Visibility} from "@material-ui/icons";
 import useConfirm from "hooks/useConfirm";
+import CategorySelect from "../../components/CategorySelect/CategorySelect";
 
 const useStyles = makeStyles({
   filter: {
@@ -20,10 +20,17 @@ const useStyles = makeStyles({
   },
 });
 
+function getRandomColor() {
+  const colors = ['default', 'primary', 'secondary'];
+  return colors[Math.floor(Math.random()*colors.length)];
+}
+
 export default function ProductIndex() {
   const classes = useStyles();
   const [confirm, showConfirm] = useConfirm();
   const [items, setItems] = React.useState([]);
+  // Query
+  const [category, setCategory] = React.useState("");
   const [search, setSearch] = React.useState("");
   const [activated, setActivated] = React.useState("");
   const [page, setPage] = React.useState(0);
@@ -39,20 +46,16 @@ export default function ProductIndex() {
       {
         Header: "Description",
         accessor: "description",
-        sortable: "false",
-        Cell: Description,
       },
       {
         Header: "Image",
         accessor: "image",
-        sortable: "false",
         Cell: ImageProduct,
       },
       {
-        Header: "Categories",
-        accessor: "categories",
-        sortable: "false",
-        Cell: Categories,
+        Header: "Category",
+        accessor: "category",
+        Cell: Category,
       },
       {
         Header: "Tags",
@@ -61,13 +64,14 @@ export default function ProductIndex() {
         Cell: Tags,
       },
       {
-        Header: "Unit",
-        accessor: "unit",
+        Header: "Price",
+        accessor: "price",
+        sortable: "true",
       },
       {
-        Header: "Unit Price",
-        accessor: "unitprice",
-        sortable: "false",
+        Header: "Active",
+        accessor: "activated",
+        Cell: Active,
       },
       {
         Header: "Action",
@@ -90,53 +94,13 @@ export default function ProductIndex() {
 
   async function fetchProduct() {
     try {
-      // const { data } = await companyService.list({
-      //   search,
-      //   page,
-      //   size,
-      //   activated,
-      // });
-      const data = {
-        items: [
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "ZFold 3",
-            description: "abc",
-            image: "https://cellphones.com.vn/media/catalog/product/g/a/galaxy-z-fold3-kv_5g__1p_cmyk_1.jpg",
-            categories: ['a', 'b', 'c'],
-            tags: ['x', 'y', 'z'],
-            unit: "kg",
-            unitprice: "10k",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-          {
-            deleted: false,
-            activated: true,
-            _id: "614589f4e0b70b0012780402",
-            title: "Zflip 3",
-            description: "abc",
-            image: "https://cellphones.com.vn/media/catalog/product/g/a/galaxy-z-fold3-kv_5g__1p_cmyk_1.jpg",
-            categories: ['a', 'b', 'c'],
-            tags: ['x', 'y', 'z'],
-            unit: "kg",
-            unitprice: "10k",
-            createdBy: "letieu8",
-            createdAt: "2021-09-18T06:40:52.348Z",
-            updatedAt: "2021-09-18T06:40:52.348Z",
-            __v: 0,
-          },
-        ],
-        paginate: {
-          count: 1,
-          size: 20,
-          page: 0,
-        },
-      }
+      const { data } = await productService.list({
+        category,
+        search,
+        page,
+        size,
+        activated,
+      });
       setItems(data.items);
       setCount(data.paginate.count);
       setPage(data.paginate.page);
@@ -157,7 +121,7 @@ export default function ProductIndex() {
 
   React.useEffect(() => {
     fetchProduct();
-  }, [page, search, activated]);
+  }, [page, search, activated, category]);
 
   return (
     <div>
@@ -194,6 +158,8 @@ export default function ProductIndex() {
             { value: "false", label: "UN ACTIVE" },
           ]}
         />
+
+        <CategorySelect haveAll={true} onSelected={(id) => setCategory(id)} />
       </div>
 
       <TablePaginate
@@ -222,68 +188,54 @@ Active.propTypes = {
   cell: PropTypes.any,
 };
 
-function Description({ cell }) {
-  return (
-    <div style={{ height: "30px", overflow: "hidden"}}>
-      <ReactQuill value={cell.value} readOnly={true} theme={"bubble"} />{" "}
-    </div>
-  );
-}
-
-Description.propTypes = {
-  cell: PropTypes.any,
-};
-
-function ImageProduct({cell}) {
-  return <img src={cell.value} alt="" style={{height: "50px"}}/>
+function ImageProduct({ cell }) {
+  return <img src={cell.value} alt="" style={{ height: "50px" }} />;
 }
 
 ImageProduct.propTypes = {
   cell: PropTypes.any,
 };
 
-function Categories({cell}){
+function Category({ cell }) {
   return (
-    <div style={{height: "50px", overflow: "hidden", display: "flex", marginTop: "10px" }}>
-      {cell.value.map((text, index) => {
-        return <div key={index} >{text},</div>
-      })}
-    </div>
-  )
+    <Tooltip
+      TransitionComponent={Fade}
+      TransitionProps={{ timeout: 600 }}
+      title={cell.value?.description ?? ''}
+    >
+      <span style={{cursor: "pointer"}}>{cell.value?.title}</span>
+    </Tooltip>
+  );
 }
-Categories.propTypes = {
+Category.propTypes = {
   cell: PropTypes.any,
 };
 
-
-function Tags({cell}){
+function Tags({ cell }) {
   return (
-    <div style={{height: "50px", overflow: "hidden", display: "flex", marginTop: "10px"  }}>
+    <>
       {cell.value.map((text, index) => {
-        return <div key={index} >{text},</div>
+        return (
+          <Chip color={getRandomColor()} key={index} label={text} size="small" />
+        );
       })}
-    </div>
-  )
+    </>
+  );
 }
 Tags.propTypes = {
   cell: PropTypes.any,
 };
 
-
 function Action({ cell, handleDelete }) {
   return (
     <div className="actions-right">
-      <Link to={"/admin/product/" + cell.row.original._id}>
-        <Button
-          justIcon
-          round
-          simple
-          //onClick={() => {
-          //let obj = data.find((o) => o.id === key);
-          //}}
-          color="success"
-          className="edit"
-        >
+      <Link to={"/admin/product/edit/" + cell.row.original._id}>
+        <Button justIcon round simple color="warning" className="edit">
+          <Edit />
+        </Button>
+      </Link>
+      <Link to={"/admin/product/edit/" + cell.row.original._id}>
+        <Button justIcon round simple color="success" className="edit">
           <Visibility />
         </Button>
       </Link>

@@ -9,9 +9,9 @@ import { makeStyles, Switch } from "@material-ui/core";
 import CustomInput from "components/CustomInput/CustomInput";
 import Button from "components/CustomButtons/Button.js";
 import { Link } from "react-router-dom";
-import ReactQuill from "react-quill";
-import { DeleteForever, Visibility } from "@material-ui/icons";
+import {DeleteForever, Edit, Visibility} from "@material-ui/icons";
 import useConfirm from "hooks/useConfirm";
+import {toast} from "react-toastify";
 
 const useStyles = makeStyles({
   filter: {
@@ -39,7 +39,10 @@ export default function UserIndex() {
       {
         Header: "Fullname",
         accessor: "title",
-        Cell: Description,
+      },
+      {
+        Header: "Email",
+        accessor: "email",
       },
       {
         Header: "status",
@@ -85,9 +88,10 @@ export default function UserIndex() {
     try {
       await userService.remove(id);
       await fetchUsers();
-      alert("done");
+      toast.success("Deleted user");
     } catch (e) {
       console.log(e);
+      toast.error("Cannot delete user");
     }
   }
 
@@ -98,7 +102,7 @@ export default function UserIndex() {
   return (
     <div>
       {confirm}
-      <Link to="/admin/company/create">
+      <Link to="/admin/user/create">
         <Button color="info">Create new User</Button>
       </Link>
 
@@ -126,8 +130,8 @@ export default function UserIndex() {
           onChange={setStatus}
           options={[
             { value: "", label: "ALL" },
-            { value: "actived", label: "ACTIVATED" },
-            { value: "blocked", label: "BLOCKED" },
+            { value: "active", label: "ACTIVATED" },
+            { value: "unactive", label: "BLOCKED" },
           ]}
         />
       </div>
@@ -147,7 +151,7 @@ export default function UserIndex() {
 function Active({ cell }) {
   return (
     <Switch
-      checked={cell.value == "actived"}
+      checked={cell.value == "active"}
       inputProps={{ "aria-label": "controlled" }}
       color="primary"
     />
@@ -158,29 +162,25 @@ Active.propTypes = {
   cell: PropTypes.any,
 };
 
-function Description({ cell }) {
-  return (
-    <div style={{ height: "30px", overflow: "hidden" }}>
-      <ReactQuill value={cell.value} readOnly={true} theme={"bubble"} />{" "}
-    </div>
-  );
-}
-
-Description.propTypes = {
-  cell: PropTypes.any,
-};
-
 function Action({ cell, handleDelete }) {
   return (
     <div className="actions-right">
-      <Link to={"/admin/company/" + cell.row.original._id}>
+      <Link to={"/admin/user/edit/" + cell.row.original.id}>
         <Button
           justIcon
           round
           simple
-          //onClick={() => {
-          //let obj = data.find((o) => o.id === key);
-          //}}
+          color="warning"
+          className="edit"
+        >
+          <Edit />
+        </Button>
+      </Link>
+      <Link to={"/admin/user/" + cell.row.original.id}>
+        <Button
+          justIcon
+          round
+          simple
           color="success"
           className="edit"
         >

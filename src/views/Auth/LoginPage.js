@@ -24,7 +24,7 @@ import authService from "services/authService";
 import SnackbarContent from "components/Snackbar/SnackbarContent";
 import { jwtManager } from "helper/jwtManager";
 import configAxios from "plugins/axios";
-import { useHistory } from "react-router";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles(styles);
 

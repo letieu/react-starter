@@ -2,68 +2,133 @@ import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import FormLabel from "@material-ui/core/FormLabel";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 
 // @material-ui/icons
-import Check from "@material-ui/icons/Check";
 import Contacts from "@material-ui/icons/Contacts";
-import useNotify from "hooks/useNotify.js";
 
 // core components
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
 import CustomInput from "components/CustomInput/CustomInput.js";
-import Button from "components/CustomButtons/Button.js";
+import LoadingButton from "@mui/lab/LoadingButton";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/regularFormsStyle";
 
-import { companyService } from "services/companyService";
+import { userService } from "services/userService";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router";
+import { toast } from "react-toastify";
+import { useHistory, useParams } from "react-router-dom";
+import {Box} from "@material-ui/core";
+import CardFooter from "../../components/Card/CardFooter";
 
 const useStyles = makeStyles(styles);
 
 export default function UserCreate() {
-  const [notify, showSuccess, showError] = useNotify();
-  const { register: company, handleSubmit } = useForm();
-  const [description, setDescription] = React.useState();
+  const { register: user, handleSubmit, setValue } = useForm({
+    status: false,
+  });
   const history = useHistory();
+  const [loading, setLoading] = React.useState(false);
+  const { id } = useParams();
 
-  function changeDescription(html) {
-    setDescription(html);
-  }
-
-  async function createCompany(form) {
+  async function createUser(payload) {
+    setLoading(true);
     try {
-      const { data } = await companyService.create({ description, ...form });
-      showSuccess();
-      window.setTimeout(() => history.push("/admin/company/" + data._id), 2000);
+      const { data } = await userService.create(payload);
+      toast.success("Created user");
+      window.setTimeout(() => history.push("/admin/user/" + data._id), 2000);
     } catch (e) {
-      showError();
+      toast.error(e.response.data.message[0]);
+    } finally {
+      setLoading(false);
     }
   }
+
+  async function updateUser(payload) {
+    setLoading(true);
+    if (!payload.password) {
+      delete payload.password;
+    }
+    try {
+      const { data } = await userService.update(id, payload);
+      toast.success("Updated user");
+      window.setTimeout(() => history.push("/admin/user/" + data._id), 2000);
+    } catch (e) {
+      console.log(e);
+      toast.error(e?.response?.data?.message[0]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onSubmit(form) {
+    const payload = {
+      status: form.status ? 'active' : 'unactive',
+      username: form.new_username,
+      password: form.new_password,
+      title: form.title,
+      email: form.email
+    }
+    if (id) {
+      updateUser(payload);
+    } else {
+      createUser(payload);
+    }
+  }
+
+  async function fetchUser(id) {
+    const { data } = await userService.view(id);
+    const fields = ["email", "title"];
+    fields.forEach((field) => setValue(field, data[field]));
+    setValue("new_username", data.username);
+    setValue("status", data.status === 'active');
+  }
+
+  React.useEffect(() => {
+    if (id) fetchUser(id);
+  }, [id]);
 
   const classes = useStyles();
   return (
     <GridContainer>
-      {notify}
       <GridItem xs={12} sm={12} md={12}>
         <Card>
-          <CardHeader color="rose" icon>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <CardHeader color="rose" icon>
             <CardIcon color="rose">
               <Contacts />
             </CardIcon>
-            <h4 className={classes.cardIconTitle}>Create company</h4>
+            <h4 className={classes.cardIconTitle}>
+              {id ? "Edit user" : "Create user"}
+            </h4>
           </CardHeader>
           <CardBody>
-            <form onSubmit={handleSubmit(createCompany)}>
+              <GridContainer alignItems="flex-start">
+                <GridItem xs={12} sm={12} md={3}>
+                  <FormLabel className={classes.labelHorizontal}>
+                    Username
+                  </FormLabel>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={9}>
+                  <CustomInput
+                    formControlProps={{
+                      fullWidth: true,
+                      autoComplete: "off",
+                    }}
+                    inputProps={{
+                      disabled: !!id,
+                      type: "text",
+                      autoComplete: "nope",
+                      ...user("new_username"),
+                    }}
+                  />
+                </GridItem>
+              </GridContainer>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={3}>
                   <FormLabel className={classes.labelHorizontal}>
@@ -77,7 +142,8 @@ export default function UserCreate() {
                     }}
                     inputProps={{
                       type: "text",
-                      ...company("title"),
+                      autoComplete: "off",
+                      ...user("title"),
                     }}
                   />
                 </GridItem>
@@ -85,52 +151,74 @@ export default function UserCreate() {
               <GridContainer alignItems="flex-start">
                 <GridItem xs={12} sm={12} md={3}>
                   <FormLabel className={classes.labelHorizontal}>
-                    Description
+                    Email
                   </FormLabel>
                 </GridItem>
                 <GridItem xs={12} sm={12} md={9}>
-                  <ReactQuill
-                    onChange={changeDescription}
-                    value={description}
+                  <CustomInput
+                    formControlProps={{
+                      fullWidth: true,
+                    }}
+                    inputProps={{
+                      type: "email",
+                      ...user("email"),
+                    }}
+                  />
+                </GridItem>
+              </GridContainer>
+              <GridContainer alignItems="flex-start">
+                <GridItem xs={12} sm={12} md={3}>
+                  <FormLabel className={classes.labelHorizontal}>
+                    Password
+                  </FormLabel>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={9}>
+                  <CustomInput
+                    formControlProps={{
+                      fullWidth: true,
+                    }}
+                    inputProps={{
+                      type: "password",
+                      autoComplete: "new-password",
+                      ...user("new_password"),
+                    }}
                   />
                 </GridItem>
               </GridContainer>
               <GridContainer justify="flex-end">
+                <GridItem xs={12} sm={12} md={3}>
+                  <FormLabel className={classes.labelHorizontal}>
+                    Active
+                  </FormLabel>
+                </GridItem>
                 <GridItem xs={12} sm={12} md={9}>
-                  <div className={classes.checkboxAndRadio}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          {...company("activated")}
-                          checkedIcon={
-                            <Check className={classes.checkedIcon} />
-                          }
-                          icon={<Check className={classes.uncheckedIcon} />}
-                          classes={{
-                            checked: classes.checked,
-                            root: classes.checkRoot,
-                          }}
-                        />
-                      }
-                      classes={{
-                        label: classes.label,
-                        root: classes.labelRoot,
-                      }}
-                      label="Active"
+                  <Box pt={5}>
+                    <input
+                      name="acceptTerms"
+                      type="checkbox"
+                      {...user('status')}
+                      id="acceptTerms"
                     />
-                  </div>
+                  </Box>
+
                 </GridItem>
               </GridContainer>
-              <GridContainer justify="flex-end">
-                <GridItem xs={12} sm={12} md={9}>
-                  <Button color="rose" type="submit">
-                    Submit
-                  </Button>
-                </GridItem>
-              </GridContainer>
-            </form>
           </CardBody>
-        </Card>
+          <CardFooter>
+            <GridContainer justify="flex-end">
+              <GridItem xs={12} sm={12} md={9}>
+                <LoadingButton
+                  type="submit"
+                  loading={loading}
+                  variant="outlined"
+                >
+                  Submit
+                </LoadingButton>
+              </GridItem>
+            </GridContainer>
+          </CardFooter>
+        </form>
+      </Card>
       </GridItem>
     </GridContainer>
   );

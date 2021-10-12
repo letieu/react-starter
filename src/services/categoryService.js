@@ -2,7 +2,7 @@ import axios from "axios";
 import { cleanObject } from "helper/cleanObject";
 
 export const categoryService = {
-  async list(filter) {
+  async list(filter = {}) {
     let searchParams = new URLSearchParams(cleanObject(filter));
     return await axios.get("/categories?" + searchParams.toString());
   },
