@@ -36,6 +36,8 @@ const customInputStyle = {
     },
   },
   labelRoot: {
+    transform: "translate(0, 1.5px) scale(0.75)",
+    transformOrigin: "top left",
     ...defaultFont,
     color: grayColor[3] + " !important",
     fontWeight: "400",

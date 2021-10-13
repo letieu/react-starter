@@ -193,7 +193,7 @@ Status.propTypes = {
 function Action({ cell, handleDelete, handleView }) {
   return (
     <div className="actions-right">
-      <Link to={"/admin/category/edit/" + cell.row.original._id}>
+      <Link to={"/admin/order/edit/" + cell.row.original._id}>
         <Button justIcon simple round color="warning">
           <Edit />
         </Button>

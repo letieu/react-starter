@@ -1,7 +1,7 @@
 import React from "react";
-import { productService } from "../../services/";
+import { productService } from "../../services/productService";
 import { Autocomplete } from "@mui/material";
-import { TextField } from "@material-ui/core";
+import {Box, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 
 const useInlineStyles = makeStyles({
@@ -66,7 +66,6 @@ const useStyles = makeStyles({
     }
   },
   inputRoot: {
-    // This matches the specificity of the default styles at https://github.com/mui-org/material-ui/blob/v4.11.3/packages/material-ui-lab/src/Autocomplete/Autocomplete.js#L90
     '&[class*="MuiOutlinedInput-root"] .MuiAutocomplete-input:first-child': {
       // Default left padding is 6px
       paddingLeft: "200px"
@@ -84,20 +83,19 @@ const useStyles = makeStyles({
 });
 
 // eslint-disable-next-line react/prop-types
-export default function ProductSelect({ onSelected, haveAll = false, inline = false, value='' }) {
+export default function ProductSelect({ onSelected, haveAll = false, inline = false }) {
   const classes = useStyles();
   const inlineClasses = useInlineStyles();
   const [products, setProducts] = React.useState([]);
   const [search, setSearch] = React.useState("");
   async function fetchProducts() {
     try {
-      const { data } = await categoryService.list({ search });
+      const { data } = await productService.list({ search });
       const items = data.items;
       if (haveAll && items) {
         items.unshift({ title: "ALL", id: "" });
       }
       setProducts(items ?? []);
-      console.log(value);
     } catch (e) {
       console.log(e);
     }
@@ -113,13 +111,23 @@ export default function ProductSelect({ onSelected, haveAll = false, inline = fa
         classes={inline ? inlineClasses : classes}
         renderOption={(props, option) => {
           return (
-            <li {...props} key={option.id}>
-              {option.title}
+            <li sx={{ '& > img': { mr: 2, flexShrink: 2 } }} {...props} key={option.id} >
+              <img
+                loading="lazy"
+                width="50"
+                src={option.image}
+              />
+              <Box ml={2}>
+                <span>{option.title}</span>
+                <br/>
+                <i>{option.price}</i>
+              </Box>
             </li>
           );
         }}
         onChange={(event, newValue) => {
-          onSelected(newValue?.id);
+          onSelected(newValue);
+          setSearch('');
         }}
         inputValue={search}
         onInputChange={(event, newInputValue) => {
@@ -130,7 +138,7 @@ export default function ProductSelect({ onSelected, haveAll = false, inline = fa
         filterOptions={(x) => x}
         getOptionLabel={(option) => option.title}
         sx={{ width: 300 }}
-        renderInput={(params) => <TextField {...params} label="Category" />}
+        renderInput={(params) => <TextField {...params} label="Product" />}
         isOptionEqualToValue={(option, value) => option.id === value.id}
       />
   );

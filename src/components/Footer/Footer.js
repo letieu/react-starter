@@ -34,40 +34,9 @@ export default function Footer(props) {
       <div className={container}>
         <div className={classes.left}>
           <List className={classes.list}>
-            <ListItem className={classes.inlineBlock}>
-              <a href="#home" className={block}>
-                {rtlActive ? "الصفحة الرئيسية" : "Home"}
-              </a>
-            </ListItem>
-            <ListItem className={classes.inlineBlock}>
-              <a href="#company" className={block}>
-                {rtlActive ? "شركة" : "Company"}
-              </a>
-            </ListItem>
-            <ListItem className={classes.inlineBlock}>
-              <a href="#portfolio" className={block}>
-                {rtlActive ? "بعدسة" : "Portfolio"}
-              </a>
-            </ListItem>
-            <ListItem className={classes.inlineBlock}>
-              <a href="#blog" className={block}>
-                {rtlActive ? "مدونة" : "Blog"}
-              </a>
-            </ListItem>
           </List>
         </div>
         <p className={classes.right}>
-          &copy; {1900 + new Date().getYear()}{" "}
-          <a
-            href="https://www.creative-tim.com?ref=mdpr-footer"
-            className={anchor}
-            target="_blank"
-          >
-            {rtlActive ? "توقيت الإبداعية" : "Creative Tim"}
-          </a>
-          {rtlActive
-            ? ", مصنوعة مع الحب لشبكة الإنترنت أفضل"
-            : ", made with love for a better web"}
         </p>
       </div>
     </footer>

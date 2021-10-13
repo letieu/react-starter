@@ -1,14 +1,7 @@
 import React from "react";
 
-// @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import InputAdornment from "@material-ui/core/InputAdornment";
-
-// @material-ui/icons
-import Face from "@material-ui/icons/Face";
-// import LockOutline from "@material-ui/icons/LockOutline";
-
-// core components
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
 import CustomInput from "components/CustomInput/CustomInput.js";
@@ -21,31 +14,23 @@ import CardFooter from "components/Card/CardFooter.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/loginPageStyle.js";
 import authService from "services/authService";
 import SnackbarContent from "components/Snackbar/SnackbarContent";
-import { jwtManager } from "helper/jwtManager";
-import configAxios from "plugins/axios";
-import {Link, useHistory} from "react-router-dom";
-import {Lock} from "@material-ui/icons";
+import {Link } from "react-router-dom";
+import { Mail} from "@material-ui/icons";
+import {toast} from "react-toastify";
 
 const useStyles = makeStyles(styles);
 
-export default function LoginPage() {
+export default function ForgotPage() {
   const [cardAnimaton, setCardAnimation] = React.useState("cardHidden");
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState("");
-  const history = useHistory();
 
   async function onSubmit(e) {
     e.preventDefault();
     try {
-      const { data } = await authService.login(username, password);
+      await authService.forgot(email);
       setError("");
-      setUsername("");
-      setPassword("");
-
-      jwtManager.set(data.access_token);
-      configAxios();
-      history.push("/admin/dashboard");
+      toast.success("Email reset password was sent");
     } catch (e) {
       console.log("Login error: ", e);
       setError(e?.response?.data?.message);
@@ -72,7 +57,7 @@ export default function LoginPage() {
                 className={`${classes.cardHeader} ${classes.textCenter}`}
                 color="rose"
               >
-                <h4 className={classes.cardTitle}>Log in</h4>
+                <h4 className={classes.cardTitle}>Forget password</h4>
               </CardHeader>
               <CardBody>
                 {error ? (
@@ -82,51 +67,33 @@ export default function LoginPage() {
                 )}
 
                 <CustomInput
-                  labelText="Username..."
-                  id="username"
+                  labelText="Email"
+                  id="email"
                   formControlProps={{
                     fullWidth: true,
                   }}
                   inputProps={{
-                    value: username,
-                    onChange: (e) => setUsername(e.target.value),
+                    value: email,
+                    onChange: (e) => setEmail(e.target.value),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Face className={classes.inputAdornmentIcon} />
+                        <Mail className={classes.inputAdornmentIcon} />
                       </InputAdornment>
                     ),
-                  }}
-                />
-                <CustomInput
-                  labelText="Password"
-                  id="password"
-                  formControlProps={{
-                    fullWidth: true,
-                  }}
-                  inputProps={{
-                    value: password,
-                    onChange: (e) => setPassword(e.target.value),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Lock className={classes.inputAdornmentIcon} />
-                      </InputAdornment>
-                    ),
-                    type: "password",
-                    autoComplete: "off",
                   }}
                 />
               </CardBody>
               <CardFooter className={classes.justifyContentCenter}>
                 <Button color="rose" size="lg" block type="submit">
-                  Login
+                  Send email
                 </Button>
               </CardFooter>
             </Card>
           </form>
 
-          <Link to="/auth/forgot">
+          <Link to="/auth/login">
             <Button color="rose" simple size="lg" block type="submit">
-              Forgot password
+              Login
             </Button>
           </Link>
         </GridItem>

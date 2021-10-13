@@ -24,15 +24,20 @@ import { UserContext } from "contexts/UserContext";
 var ps;
 
 const useStyles = makeStyles(styles);
-const checkAuth = () => {
+
+export default function Dashboard(props) {
+  const { ...rest } = props;
+
   const history = useHistory();
   const userRef = useRef(undefined);
+  const [user, setUser] = React.useState({});
 
   React.useEffect(() => {
     async function checkLogin() {
       try {
         const { data } = await authService.me();
         userRef.current = data;
+        setUser(data);
       } catch (e) {
         history.push("/auth/login");
       }
@@ -40,11 +45,6 @@ const checkAuth = () => {
 
     checkLogin();
   }, []);
-};
-
-export default function Dashboard(props) {
-  const { ...rest } = props;
-  checkAuth();
 
   // states and functions
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -167,11 +167,12 @@ export default function Dashboard(props) {
   };
 
   return (
-    <UserContext.Provider value="{currentUser}">
+    <UserContext.Provider value={userRef}>
       <div className={classes.wrapper}>
         <Sidebar
           routes={routes.filter((item) => item?.isMenu)}
-          logoText={"TAC Industry"}
+          logoText={"SOINCORP"}
+          user={user}
           logo={logo}
           image={image}
           handleDrawerToggle={handleDrawerToggle}
@@ -195,7 +196,7 @@ export default function Dashboard(props) {
               <div className={classes.container}>
                 <Switch>
                   {getRoutes(routes)}
-                  <Redirect from="/admin" to="/admin/dashboard" />
+                  <Redirect from="/admin" to="/admin/order" />
                 </Switch>
               </div>
             </div>
@@ -203,7 +204,7 @@ export default function Dashboard(props) {
             <div className={classes.map}>
               <Switch>
                 {getRoutes(routes)}
-                <Redirect from="/admin" to="/admin/dashboard" />
+                <Redirect from="/admin" to="/admin/order" />
               </Switch>
             </div>
           )}

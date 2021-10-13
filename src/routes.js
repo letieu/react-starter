@@ -16,6 +16,8 @@ import ProductView from "views/Product/ProductView";
 import ProductCreate from "views/Product/ProductCreate";
 import OrderIndex from "./views/Order/OrderIndex";
 import OrderCreate from "./views/Order/OrderCreate";
+import UserProfile from "./views/Auth/UserProfile";
+import ForgotPage from "./views/Auth/ForgotPage";
 
 
 var dashRoutes = [
@@ -36,10 +38,21 @@ var dashRoutes = [
         component: RegisterPage,
         layout: "/auth",
       },
+      {
+        path: "/forgot",
+        name: "Forgot",
+        component: ForgotPage,
+        layout: "/auth",
+      },
     ],
   },
-
   // =================================================================== USER
+  {
+    path: "/profile",
+    name: "Profile",
+    component: UserProfile,
+    layout: "/admin",
+  },
   {
     path: "/user/create",
     name: "Create User",
@@ -117,14 +130,15 @@ var dashRoutes = [
   // =================================================================== ORDER
   {
     path: "/order/create",
-    name: "Create Order",
+    name: "Order create",
     layout: "/admin",
     component: OrderCreate,
   },
   {
-    path: "/order/:id",
-    name: "Order",
+    path: "/order/edit/:id",
+    name: "Order edit",
     layout: "/admin",
+    component: OrderCreate,
   },
   {
     isMenu: true,

@@ -342,7 +342,7 @@ function Sidebar(props) {
             onClick={() => setOpenAvatar(!openAvatar)}
           >
             <ListItemText
-              primary={rtlActive ? "تانيا أندرو" : "Tania Andrew"}
+              primary={props?.user?.title}
               secondary={
                 <b
                   className={
@@ -362,22 +362,7 @@ function Sidebar(props) {
             <List className={classes.list + " " + classes.collapseList}>
               <ListItem className={classes.collapseItem}>
                 <NavLink
-                  to="#"
-                  className={classes.itemLink + " " + classes.userCollapseLinks}
-                >
-                  <span className={collapseItemMini}>
-                    {rtlActive ? "مع" : "MP"}
-                  </span>
-                  <ListItemText
-                    primary={rtlActive ? "ملفي" : "My Profile"}
-                    disableTypography={true}
-                    className={collapseItemText}
-                  />
-                </NavLink>
-              </ListItem>
-              <ListItem className={classes.collapseItem}>
-                <NavLink
-                  to="#"
+                  to={"/admin/profile"}
                   className={classes.itemLink + " " + classes.userCollapseLinks}
                 >
                   <span className={collapseItemMini}>
@@ -400,6 +385,19 @@ function Sidebar(props) {
                   </span>
                   <ListItemText
                     primary={rtlActive ? "إعدادات" : "Settings"}
+                    disableTypography={true}
+                    className={collapseItemText}
+                  />
+                </NavLink>
+                <NavLink
+                  to={"/auth/login"}
+                  className={classes.itemLink + " " + classes.userCollapseLinks}
+                >
+                  <span className={collapseItemMini}>
+                    OT
+                  </span>
+                  <ListItemText
+                    primary={"Logout"}
                     disableTypography={true}
                     className={collapseItemText}
                   />
@@ -437,15 +435,13 @@ function Sidebar(props) {
   var brand = (
     <div className={logoClasses}>
       <a
-        href="https://www.creative-tim.com?ref=mdpr-sidebar"
-        target="_blank"
+        href="/"
         className={logoMini}
       >
         <img src={logo} alt="logo" className={classes.img} />
       </a>
       <a
-        href="https://www.creative-tim.com?ref=mdpr-sidebar"
-        target="_blank"
+        href="/"
         className={logoNormal}
       >
         {logoText}
