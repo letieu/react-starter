@@ -1,15 +1,12 @@
-# build
-FROM node:lts-slim as builder
+# build stage
+FROM node:lts-alpine as builder
 WORKDIR /app
-ARG STAGE
-
-COPY ["package.json", "package-lock.json*", "./"]
+COPY package*.json ./
 RUN npm install
-#RUN npm rebuild node-sass
 COPY . .
-RUN echo $STAGE
-RUN ./env.sh
+RUN ls -a
 RUN npm run build
+RUN ls -a /app/build
 
 #  server
 FROM nginx:stable-alpine as server
